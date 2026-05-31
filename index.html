@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kopi Moka Priceless</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #f4f6f9; padding: 10px; padding-bottom: 40px; }
         
-        /* Sticky Input Header */
+        /* Fixed Header Element Controls */
         .header-sticky {
             position: fixed;
             top: 0;
@@ -45,8 +45,9 @@
             color: #1c7ed6;
         }
         
-        .pdf-btn {
-            background-color: #27ae60;
+        /* Photo Export Trigger Action Button */
+        .photo-btn {
+            background-color: #e67e22;
             color: white;
             border: none;
             padding: 12px;
@@ -58,9 +59,9 @@
             text-transform: uppercase;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .pdf-btn:active { background-color: #1e8449; }
+        .photo-btn:active { background-color: #d35400; }
 
-        /* App Screen Layout Container */
+        /* Smartphone Dynamic Scroller Table Container */
         .table-container { margin-top: 120px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
         table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; }
@@ -71,30 +72,30 @@
         .col-white { background-color: #ffffff; }
         .calc-result { color: #2b8a3e; font-weight: bold; }
 
-        /* EXPORT EXCLUSIVE STYLING (Two-Face Landscape Blueprint) */
-        .print-canvas {
-            background: white;
-            padding: 15px;
-            width: 1080px; /* Locked resolution ratio for clean PDF generation */
+        /* STAGING BLUEPRINT CANVAS - BUILT SPECIFICALLY FOR THE PHOTO IMAGE SAVER */
+        .image-blueprint-canvas {
+            background: #ffffff;
+            padding: 20px;
+            width: 950px; /* Locks sharp proportions to save perfectly */
             position: absolute;
-            left: -9999px; /* Keeps layout hidden from mobile screens */
+            left: -9999px; /* Invisible to standard screen tracking on mobile */
             top: 0;
         }
-        .print-title {
+        .canvas-title {
             text-align: center;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
             margin-bottom: 15px;
             color: #2c3e50;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .split-container { width: 100%; display: flex; gap: 20px; }
-        .face-column { flex: 1; }
-        .face-column table { width: 100%; border-collapse: collapse; }
-        .face-column th, .face-column td { border: 1px solid #bdc3c7; padding: 6px 4px; font-size: 11px; }
-        .face-column th { background-color: #34495e; color: white; }
-        .face-column .col-grey { background-color: #f2f4f4; }
+        .two-face-split { width: 100%; display: flex; gap: 20px; background: white; }
+        .split-pane { flex: 1; }
+        .split-pane table { width: 100%; border-collapse: collapse; }
+        .split-pane th, .split-pane td { border: 1px solid #7f8c8d !important; padding: 6px 4px; font-size: 12px; }
+        .split-pane th { background-color: #34495e; color: white; }
+        .split-pane .col-grey { background-color: #e5e8e8; }
     </style>
 </head>
 <body>
@@ -104,7 +105,7 @@
             <label>Base Rating:</label>
             <input type="number" id="baseInput" value="6260" inputmode="decimal" oninput="calculateMatrix()">
         </div>
-        <button class="pdf-btn" onclick="exportToPDF()">Save As PDF Document</button>
+        <button class="photo-btn" onclick="exportToPhoto()">Save As Photo Image</button>
     </div>
 
     <div class="table-container">
@@ -121,10 +122,10 @@
         </table>
     </div>
 
-    <div id="pdfCaptureTarget" class="print-canvas">
-        <div class="print-title" id="pdfTitle">Kopi Moka Priceless Matrix</div>
-        <div class="split-container">
-            <div class="face-column">
+    <div id="photoTargetBlock" class="image-blueprint-canvas">
+        <div class="canvas-title" id="canvasTitle">Kopi Moka Priceless Matrix</div>
+        <div class="two-face-split">
+            <div class="split-pane">
                 <table>
                     <thead>
                         <tr>
@@ -134,10 +135,10 @@
                             <th>COINS</th>
                         </tr>
                     </thead>
-                    <tbody id="pdfBodyLeft"></tbody>
+                    <tbody id="canvasBodyLeft"></tbody>
                 </table>
             </div>
-            <div class="face-column">
+            <div class="split-pane">
                 <table>
                     <thead>
                         <tr>
@@ -147,7 +148,7 @@
                             <th>COINS</th>
                         </tr>
                     </thead>
-                    <tbody id="pdfBodyRight"></tbody>
+                    <tbody id="canvasBodyRight"></tbody>
                 </table>
             </div>
         </div>
@@ -170,29 +171,29 @@
     function calculateMatrix() {
         const baseVal = parseFloat(document.getElementById('baseInput').value);
         const tbody = document.getElementById('matrixBody');
-        const pdfLeft = document.getElementById('pdfBodyLeft');
-        const pdfRight = document.getElementById('pdfBodyRight');
+        const canvasLeft = document.getElementById('canvasBodyLeft');
+        const canvasRight = document.getElementById('canvasBodyRight');
         
-        document.getElementById('pdfTitle').innerText = `Kopi Moka Priceless Matrix (Base Rate: ${baseVal.toLocaleString()})`;
+        document.getElementById('canvasTitle').innerText = `Kopi Moka Priceless Matrix (Base Rate: ${baseVal.toLocaleString()})`;
 
         tbody.innerHTML = '';
-        pdfLeft.innerHTML = '';
-        pdfRight.innerHTML = '';
+        canvasLeft.innerHTML = '';
+        canvasRight.innerHTML = '';
 
         if (isNaN(baseVal) || baseVal <= 0) return;
 
-        const splitThreshold = 18; // Separates lists cleanly across columns 
+        const splitPoint = 18; // Splits rows evenly into two parallel canvas panels
 
         for (let i = 0; i < leftCoins.length; i++) {
             const coinLeft = leftCoins[i];
             const costRight = rightCosts[i];
 
-            // LEFT Math: Add 300 to coin value if it's 15,000 or below, then round up
+            // Left Calculation Engine (+300 coin logic for values under or equal to 15000)
             let calculationCoins = coinLeft;
             if (coinLeft <= 15000) { calculationCoins = coinLeft + 300; }
             const computedCostLeft = Math.ceil((calculationCoins / 1000000) * baseVal);
 
-            // RIGHT Math: Convert cost to coins, then round down to nearest 100
+            // Right Calculation Engine (Forced rounding down pattern targeting base step hundreds)
             let exactCoinsRight = (costRight / baseVal) * 1000000;
             let computedCoinsRight = Math.floor(exactCoinsRight / 100) * 100;
 
@@ -206,32 +207,39 @@
 
             tbody.innerHTML += rowHTML;
 
-            // Sort rows into separate PDF columns
-            if (i < splitThreshold) {
-                pdfLeft.innerHTML += rowHTML;
+            // Balance elements straight across split screenshot tables
+            if (i < splitPoint) {
+                canvasLeft.innerHTML += rowHTML;
             } else {
-                pdfRight.innerHTML += rowHTML;
+                canvasRight.innerHTML += rowHTML;
             }
         }
     }
 
-    function exportToPDF() {
+    function exportToPhoto() {
         const baseVal = document.getElementById('baseInput').value;
-        const element = document.getElementById('pdfCaptureTarget');
-        
-        // Configuration to guarantee everything fits beautifully onto a single landscape page
-        const opt = {
-            margin:       0.3,
-            filename:     `Kopi_Moka_Matrix_${baseVal}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
-        };
+        const targetElement = document.getElementById('photoTargetBlock');
 
-        html2pdf().set(opt).from(element).save();
+        // Capture structural element directly and map data to image URI source link
+        html2canvas(targetElement, {
+            scale: 3, // Multiplies canvas sharpness so image isn't blurry on zoom-in
+            logging: false,
+            backgroundColor: "#ffffff"
+        }).then(canvas => {
+            const imageURI = canvas.toDataURL("image/png");
+            
+            // Create temporary asset download trigger
+            const downloadTrigger = document.createElement('a');
+            downloadTrigger.href = imageURI;
+            downloadTrigger.download = `Kopi_Moka_Matrix_${baseVal}.png`;
+            
+            document.body.appendChild(downloadTrigger);
+            downloadTrigger.click();
+            document.body.removeChild(downloadTrigger);
+        });
     }
 
     calculateMatrix();
 </script>
 </body>
-  </html>
+</html>
