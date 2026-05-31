@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kopi Moka Priceless</title>
     
-    <!-- Image Screenshot Capture Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f4f6f9; padding: 0; padding-bottom: 40px; width: 100vw; overflow-x: hidden; }
         
-        /* Fixed Header Controls */
+        body { 
+            background-color: #f4f6f9; 
+            padding: 0; 
+            margin: 0; 
+            width: 100vw; 
+            overflow-x: hidden; 
+        }
+        
+        /* Fixed Header Controls - Locked to Phone Viewport */
         .header-sticky {
             position: fixed;
             top: 0;
@@ -45,9 +51,17 @@
             background: #e7f5ff;
             color: #1c7ed6;
         }
+
+        /* Action Buttons Row */
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
         
         /* Photo Export Button */
         .photo-btn {
+            flex: 1;
             background-color: #e67e22;
             color: white;
             border: none;
@@ -56,114 +70,212 @@
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            width: 100%;
             text-transform: uppercase;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .photo-btn:active { background-color: #d35400; }
 
-        /* Table Container Layout - Full Width Responsive on Screen */
-        .table-container { 
-            margin-top: 135px; 
-            background: white; 
-            overflow: hidden; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            width: 100%;
+        /* Settings Toggle Button on the Right Side */
+        .settings-toggle-btn {
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 14px 18px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
-        /* Main Image Capture Target Style */
-        #photoTargetBlock {
-            background: #ffffff;
-            padding: 20px 0px; 
-            width: 100%;
+        .settings-toggle-btn:active { background-color: #374151; }
+
+        /* Customization Slide Panel Control Drawer */
+        .settings-panel {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 2px;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 260px;
+            overflow-y: auto;
         }
-        
-        .canvas-title {
-            text-align: center;
-            font-size: 28px;
-            font-weight: 900;
-            margin-bottom: 20px;
-            color: #1e3a8a;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .settings-panel.open { display: flex; }
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #f1f5f9;
+        }
+        .color-picker-group input[type="color"] {
+            border: none;
+            width: 35px;
+            height: 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            background: none;
         }
 
-        /* Full Edge-to-Edge Screen Grid layout */
+        /* SCALER WRAPPER */
+        .scale-wrapper {
+            margin-top: 195px; /* Pushed down slightly to account for the settings bar expansion safety */
+            width: 100vw;
+            overflow: visible;
+            display: flex;
+            justify-content: center;
+            transition: margin-top 0.2s ease;
+        }
+
+        /* FIXED HARD BOUNDARIES: 1080x3000 Container Block */
+        #photoTargetBlock {
+            background: #ffffff;
+            width: 1080px !important;
+            height: 3000px !important;
+            min-height: 3000px !important;
+            max-height: 3000px !important;
+            padding: 45px 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform-origin: top center; 
+            flex-shrink: 0;
+        }
+        
+        /* INITIAL COLOR PARAMS (Customizable through variables altered dynamically by Settings panel JS) */
+        :root {
+            --title-color: #1e3a8a;
+            --th-bg: #475569;
+            --th-text: #ffffff;
+            --calc-result-color: #16a34a;
+            --col-grey-bg: #f1f5f9;
+            --col-grey-text: #0f172a;
+            --col-white-bg: #ffffff;
+            --col-white-text: #1e293b;
+        }
+
+        .canvas-title {
+            text-align: center;
+            font-size: 72px; 
+            font-weight: 950;
+            margin-bottom: 40px;
+            color: var(--title-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
         table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; }
         
-        /* Strict No-Wrap Structural Safeguard */
         th, td { 
             border: 1px solid #cbd5e1; 
-            padding: 14px 1px;
             width: 25%; 
             white-space: nowrap; 
             overflow: hidden;
         }
         
-        th { background-color: #475569; color: white; font-weight: bold; font-size: 16px; letter-spacing: 0.5px; }
+        th { 
+            background-color: var(--th-bg); 
+            color: var(--th-text); 
+            font-weight: bold; 
+            font-size: 34px; 
+            padding: 20px 2px;
+            letter-spacing: 0.5px; 
+        }
         
-        /* MAIN APP CELL FONT SIZES - Maximized to fill empty spaces safely */
         td { 
-            font-size: 4.8vw; /* Increased from 4.5vw to scale larger into cell width */
+            font-size: 40px; 
             font-weight: 800; 
-            color: #1e293b; 
+            padding: 19px 2px;
         }
         
-        .col-grey { background-color: #f1f5f9; font-weight: 800; color: #0f172a; }
-        .col-white { background-color: #ffffff; }
-        .calc-result { color: #16a34a; font-weight: 900; font-size: 5.2vw; } /* Prominent green styling for calculations */
-
-        /* RULES TO LOCK PHOTO OUTPUT FIXED TO 1080x3000 DIMENSIONS WITH BIG NUMBERS */
-        .html2canvas-container {
-            width: 1080px !important;
-            height: 3000px !important;
+        /* Assignment classes mapped directly into setup variables */
+        .col-grey { 
+            background-color: var(--col-grey-bg); 
+            color: var(--col-grey-text); 
+            font-weight: 800; 
         }
-        .export-mode #photoTargetBlock {
-            width: 1080px !important;
-            padding: 40px 0px !important;
+        .col-white { 
+            background-color: var(--col-white-bg);
+            color: var(--col-white-text);
         }
-        .export-mode .canvas-title {
-            font-size: 54px !important;
-            margin-bottom: 35px !important;
-        }
-        .export-mode th {
-            font-size: 34px !important;
-            padding: 20px 2px !important;
-        }
-        .export-mode td {
-            font-size: 42px !important; /* Heavily upscaled to fill wide spacing in 1080px canvas */
-            padding: 21px 2px !important;
-        }
-        .export-mode .calc-result {
-            font-size: 46px !important;
-        }
+        .calc-result { 
+            color: var(--calc-result-color) !important; 
+            font-weight: 900; 
+            font-size: 44px; 
+        } 
     </style>
 </head>
 <body>
 
-    <!-- Fixed Top Menu Layer -->
-    <div class="header-sticky">
+    <div class="header-sticky" id="stickyHeader">
         <div class="input-row">
             <label>Base Rating:</label>
             <input type="number" id="baseInput" value="6260" inputmode="decimal" oninput="calculateMatrix()">
         </div>
-        <button class="photo-btn" onclick="exportToPhoto()">Save As Photo Image</button>
+        <div class="btn-row">
+            <button class="photo-btn" onclick="exportToPhoto()">Save As Photo Image</button>
+            <button class="settings-toggle-btn" onclick="toggleSettingsPanel()">⚙️</button>
+        </div>
+
+        <div class="settings-panel" id="settingsPanel">
+            <div class="color-picker-group">
+                <span>Title Color:</span>
+                <input type="color" id="pickerTitle" value="#1e3a8a" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>Header Background:</span>
+                <input type="color" id="pickerThBg" value="#475569" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>Header Text:</span>
+                <input type="color" id="pickerThText" value="#ffffff" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>Calculation Text (Green Results):</span>
+                <input type="color" id="pickerCalc" value="#16a34a" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>Grey Column Background:</span>
+                <input type="color" id="pickerGreyBg" value="#f1f5f9" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>Grey Column Text:</span>
+                <input type="color" id="pickerGreyText" value="#0f172a" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>White Column Background:</span>
+                <input type="color" id="pickerWhiteBg" value="#ffffff" oninput="updateLiveColors()">
+            </div>
+            <div class="color-picker-group">
+                <span>White Column Text:</span>
+                <input type="color" id="pickerWhiteText" value="#1e293b" oninput="updateLiveColors()">
+            </div>
+        </div>
     </div>
 
-    <!-- Main List View -->
-    <div class="table-container" id="photoTargetBlock">
-        <div class="canvas-title">POPPO COINS</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>PRICE</th>
-                    <th>COINS</th>
-                    <th>PRICE</th>
-                    <th>COINS</th>
-                </tr>
-            </thead>
-            <tbody id="matrixBody"></tbody>
-        </table>
+    <div class="scale-wrapper" id="scaleWrapper">
+        <div id="photoTargetBlock">
+            <div class="canvas-title">POPPO COINS</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>PRICE</th>
+                        <th>COINS</th>
+                        <th>PRICE</th>
+                        <th>COINS</th>
+                    </tr>
+                </thead>
+                <tbody id="matrixBody"></tbody>
+            </table>
+        </div>
     </div>
 
 <script>
@@ -179,6 +291,31 @@
         750, 800, 850, 900, 950, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 
         4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000
     ];
+
+    function toggleSettingsPanel() {
+        const panel = document.getElementById('settingsPanel');
+        const wrapper = document.getElementById('scaleWrapper');
+        panel.classList.toggle('open');
+        
+        // Dynamically shift the matrix down when panel opens so headers do not block it
+        setTimeout(() => {
+            const headerHeight = document.getElementById('stickyHeader').offsetHeight;
+            wrapper.style.marginTop = `${headerHeight + 8}px`;
+        }, 50);
+    }
+
+    // Live applies custom palette values into Document Elements Style variables roots
+    function updateLiveColors() {
+        const root = document.documentElement;
+        root.style.setProperty('--title-color', document.getElementById('pickerTitle').value);
+        root.style.setProperty('--th-bg', document.getElementById('pickerThBg').value);
+        root.style.setProperty('--th-text', document.getElementById('pickerThText').value);
+        root.style.setProperty('--calc-result-color', document.getElementById('pickerCalc').value);
+        root.style.setProperty('--col-grey-bg', document.getElementById('pickerGreyBg').value);
+        root.style.setProperty('--col-grey-text', document.getElementById('pickerGreyText').value);
+        root.style.setProperty('--col-white-bg', document.getElementById('pickerWhiteBg').value);
+        root.style.setProperty('--col-white-text', document.getElementById('pickerWhiteText').value);
+    }
 
     function calculateMatrix() {
         const baseVal = parseFloat(document.getElementById('baseInput').value);
@@ -201,29 +338,41 @@
 
             const rowHTML = `
                 <tr>
-                    <td class="col-grey calc-result">${computedCostLeft.toLocaleString()}</td>
+                    <td class="col-grey calc-result">₱${computedCostLeft.toLocaleString()}</td>
                     <td class="col-white">${coinLeft.toLocaleString()}</td>
-                    <td class="col-grey">${costRight.toLocaleString()}</td>
+                    <td class="col-grey">₱${costRight.toLocaleString()}</td>
                     <td class="col-white calc-result">${computedCoinsRight.toLocaleString()}</td>
                 </tr>`;
 
             tbody.innerHTML += rowHTML;
         }
+        adjustScale();
+    }
+
+    function adjustScale() {
+        const target = document.getElementById('photoTargetBlock');
+        const wrapper = document.getElementById('scaleWrapper');
+        const screenWidth = window.innerWidth;
+        
+        const scaleFactor = screenWidth / 1080;
+        
+        target.style.transform = `scale(${scaleFactor})`;
+        wrapper.style.height = `${3000 * scaleFactor}px`;
     }
 
     function exportToPhoto() {
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
 
-        // Step 1: Force export class variables to lock dimensions down to 1080x3000 specs
-        document.body.classList.add('export-mode');
+        const currentTransform = targetElement.style.transform;
+        targetElement.style.transform = 'none';
 
         html2canvas(targetElement, {
             width: 1080,
             height: 3000,
             scale: 1, 
             logging: false,
-            backgroundColor: "#ffffff",
+            backgroundColor: null, // Captures exact customized backplate states cleanly
             windowWidth: 1080,
             windowHeight: 3000
         }).then(canvas => {
@@ -237,11 +386,11 @@
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
 
-            // Step 2: Clear layout flag to return to your normal responsive mobile display
-            document.body.classList.remove('export-mode');
+            targetElement.style.transform = currentTransform;
         });
     }
 
+    window.addEventListener('resize', adjustScale);
     calculateMatrix();
 </script>
 </body>
