@@ -91,7 +91,7 @@
         }
         .settings-toggle-btn:active { background-color: #374151; }
 
-        /* Customization Slide Panel Control Drawer */
+        /* Customization Control Drawer */
         .settings-panel {
             display: none;
             background: #f8fafc;
@@ -129,7 +129,7 @@
 
         /* SCALER WRAPPER */
         .scale-wrapper {
-            margin-top: 195px; /* Pushed down slightly to account for the settings bar expansion safety */
+            margin-top: 195px; 
             width: 100vw;
             overflow: visible;
             display: flex;
@@ -137,20 +137,17 @@
             transition: margin-top 0.2s ease;
         }
 
-        /* FIXED HARD BOUNDARIES: 1080x3000 Container Block */
+        /* DYNAMIC AUTO-HEIGHT BOUNDARY: Locked to 1080px wide, height grows automatically to prevent cutting */
         #photoTargetBlock {
             background: #ffffff;
             width: 1080px !important;
-            height: 3000px !important;
-            min-height: 3000px !important;
-            max-height: 3000px !important;
             padding: 45px 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-origin: top center; 
             flex-shrink: 0;
         }
         
-        /* INITIAL COLOR PARAMS (Customizable through variables altered dynamically by Settings panel JS) */
+        /* THEME COLOR PARAMS */
         :root {
             --title-color: #1e3a8a;
             --th-bg: #475569;
@@ -196,7 +193,6 @@
             padding: 19px 2px;
         }
         
-        /* Assignment classes mapped directly into setup variables */
         .col-grey { 
             background-color: var(--col-grey-bg); 
             color: var(--col-grey-text); 
@@ -297,14 +293,12 @@
         const wrapper = document.getElementById('scaleWrapper');
         panel.classList.toggle('open');
         
-        // Dynamically shift the matrix down when panel opens so headers do not block it
         setTimeout(() => {
             const headerHeight = document.getElementById('stickyHeader').offsetHeight;
             wrapper.style.marginTop = `${headerHeight + 8}px`;
         }, 50);
     }
 
-    // Live applies custom palette values into Document Elements Style variables roots
     function updateLiveColors() {
         const root = document.documentElement;
         root.style.setProperty('--title-color', document.getElementById('pickerTitle').value);
@@ -357,7 +351,10 @@
         const scaleFactor = screenWidth / 1080;
         
         target.style.transform = `scale(${scaleFactor})`;
-        wrapper.style.height = `${3000 * scaleFactor}px`;
+        
+        // Dynamically reads the total length of the table rows and sizes the wrapper so it fits on screen perfectly
+        const naturalHeight = target.scrollHeight;
+        wrapper.style.height = `${naturalHeight * scaleFactor}px`;
     }
 
     function exportToPhoto() {
@@ -367,14 +364,17 @@
         const currentTransform = targetElement.style.transform;
         targetElement.style.transform = 'none';
 
+        // Finds the exact actual height needed to display all contents without cropping
+        const finalCalculatedHeight = targetElement.scrollHeight;
+
         html2canvas(targetElement, {
             width: 1080,
-            height: 3000,
+            height: finalCalculatedHeight, 
             scale: 1, 
             logging: false,
-            backgroundColor: null, // Captures exact customized backplate states cleanly
+            backgroundColor: null,
             windowWidth: 1080,
-            windowHeight: 3000
+            windowHeight: finalCalculatedHeight
         }).then(canvas => {
             const imageURI = canvas.toDataURL("image/png");
             
