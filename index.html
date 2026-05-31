@@ -137,15 +137,19 @@
             transition: margin-top 0.2s ease;
         }
 
-        /* FIXED 1080px WIDTH WITH AUTO HEIGHT STRUCTURE SAFETY */
+        /* STRICT 1080x3000 GEOMETRIC CONTAINER BOX */
         #photoTargetBlock {
             width: 1080px !important;
-            padding: 45px 25px 60px 25px; /* Added extra bottom buffer padding */
+            height: 3000px !important;
+            min-height: 3000px !important;
+            max-height: 3000px !important;
+            padding: 50px 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-origin: top center; 
             flex-shrink: 0;
-            display: block;
-            height: auto !important;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
         
         /* THEME COLOR PARAMS */
@@ -161,22 +165,30 @@
             --col-white-text: #1e293b;
         }
 
-        /* Enforce current canvas background across target element container */
         #photoTargetBlock {
             background-color: var(--canvas-bg) !important;
         }
 
         .canvas-title {
             text-align: center;
-            font-size: 72px; 
+            font-size: 76px; 
             font-weight: 950;
-            margin-bottom: 40px;
+            margin-bottom: 45px;
             color: var(--title-color);
             text-transform: uppercase;
             letter-spacing: 2px;
+            flex-shrink: 0;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; background-color: transparent; }
+        /* Fixed Table Sizing to Guarantee 100% Fit in 3000px Height */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: center; 
+            table-layout: fixed; 
+            background-color: transparent;
+            height: 2750px; /* Forces table element to match internal canvas space perfectly */
+        }
         
         th, td { 
             border: 1px solid #cbd5e1; 
@@ -190,14 +202,13 @@
             color: var(--th-text); 
             font-weight: bold; 
             font-size: 34px; 
-            padding: 20px 2px;
             letter-spacing: 0.5px; 
         }
         
+        /* Numbers structured cleanly to maximize font face size safely */
         td { 
-            font-size: 40px; 
+            font-size: 38px; 
             font-weight: 800; 
-            padding: 19px 2px;
         }
         
         .col-grey { 
@@ -212,7 +223,7 @@
         .calc-result { 
             color: var(--calc-result-color) !important; 
             font-weight: 900; 
-            font-size: 44px; 
+            font-size: 42px; 
         } 
     </style>
 </head>
@@ -363,30 +374,28 @@
         const scaleFactor = screenWidth / 1080;
         target.style.transform = `scale(${scaleFactor})`;
         
-        const naturalHeight = target.offsetHeight;
-        wrapper.style.height = `${naturalHeight * scaleFactor}px`;
+        // Locks wrapper height layout to fit exactly onto phone display coordinates
+        wrapper.style.height = `${3000 * scaleFactor}px`;
     }
 
     function exportToPhoto() {
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
 
-        // Reset scaling visually so code can extract native size blueprint metrics
+        // Reset scaling transform for rendering native high resolution matrix layout
         const currentTransform = targetElement.style.transform;
         targetElement.style.transform = 'none';
 
-        // Read the absolute total layout block footprint height required
-        const finalCalculatedHeight = targetElement.getBoundingClientRect().height;
         const currentBgColor = document.getElementById('pickerCanvasBg').value;
 
         html2canvas(targetElement, {
             width: 1080,
-            height: finalCalculatedHeight, 
+            height: 3000, 
             scale: 1, 
             logging: false,
-            backgroundColor: currentBgColor, // Enforce the color picker background on output
+            backgroundColor: currentBgColor, 
             windowWidth: 1080,
-            windowHeight: finalCalculatedHeight,
+            windowHeight: 3000,
             scrollX: 0,
             scrollY: 0
         }).then(canvas => {
@@ -408,4 +417,4 @@
     calculateMatrix();
 </script>
 </body>
-</html>
+                </html>
