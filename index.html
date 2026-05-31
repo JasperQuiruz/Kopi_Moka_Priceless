@@ -9,9 +9,9 @@
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f4f6f9; padding: 8px; padding-bottom: 40px; width: 100vw; overflow-x: hidden; }
+        body { background-color: #f4f6f9; padding: 0; padding-bottom: 40px; width: 100vw; overflow-x: hidden; }
         
-        /* Fixed Header Controls - Fits perfectly on screen width */
+        /* Fixed Header Controls */
         .header-sticky {
             position: fixed;
             top: 0;
@@ -35,8 +35,8 @@
         .header-sticky label { font-weight: bold; color: #2c3e50; font-size: 18px; }
         .header-sticky input {
             flex: 1;
-            padding: 12px;
-            font-size: 22px; /* Bigger input text */
+            padding: 10px;
+            font-size: 22px;
             font-weight: bold;
             border: 2px solid #228be6;
             border-radius: 8px;
@@ -51,7 +51,7 @@
             color: white;
             border: none;
             padding: 14px;
-            font-size: 16px; /* Bigger button text */
+            font-size: 16px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
@@ -61,44 +61,57 @@
         }
         .photo-btn:active { background-color: #d35400; }
 
-        /* Table Container Layout - Autoscale to screen size */
+        /* Table Container Layout - Maximum Screen Stretching */
         .table-container { 
             margin-top: 135px; 
             background: white; 
-            border-radius: 8px; 
             overflow: hidden; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             width: 100%;
         }
         
-        /* Main Image Capture Target Style */
+        /* Main Image Capture Target Style - Zero Side Padding for Full Width */
         #photoTargetBlock {
             background: #ffffff;
-            padding: 12px;
+            padding: 15px 0px; 
             width: 100%;
         }
         
         .canvas-title {
             text-align: center;
-            font-size: 22px; /* Bigger title text */
-            font-weight: bold;
+            font-size: 26px;
+            font-weight: 900;
             margin-bottom: 15px;
-            color: #2c3e50;
+            color: #1e3a8a;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
-        /* Full Screen Width Matrix Table Grid */
+        /* Full Edge-to-Edge Screen Grid layout */
         table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; }
-        th, td { border: 1px solid #cbd5e1; padding: 12px 2px; width: 25%; word-wrap: break-word; }
         
-        /* BIGGER NUMBERS & HEADERS STRUCUTRE */
+        /* Strict No-Wrap Structural Safeguard */
+        th, td { 
+            border: 1px solid #cbd5e1; 
+            padding: 14px 1px;
+            width: 25%; 
+            white-space: nowrap; 
+            overflow: hidden;
+        }
+        
+        /* Bold Headers - Updated Labels to PRICE */
         th { background-color: #475569; color: white; font-weight: bold; font-size: 16px; letter-spacing: 0.5px; }
-        td { font-size: 18px; font-weight: 600; color: #334155; }
         
-        .col-grey { background-color: #f1f5f9; font-weight: bold; color: #1e293b; }
+        /* MAXIMIZED BOLDER NUMBERS */
+        td { 
+            font-size: 4.5vw; 
+            font-weight: 800; 
+            color: #1e293b; 
+        }
+        
+        .col-grey { background-color: #f1f5f9; font-weight: 800; color: #0f172a; }
         .col-white { background-color: #ffffff; }
-        .calc-result { color: #16a34a; font-weight: bold; font-size: 19px; } /* Clean emphasized outcome values */
+        .calc-result { color: #16a34a; font-weight: 900; font-size: 5vw; } 
     </style>
 </head>
 <body>
@@ -112,13 +125,13 @@
     </div>
 
     <div class="table-container" id="photoTargetBlock">
-        <div class="canvas-title" id="canvasTitle">Kopi Moka Priceless</div>
+        <div class="canvas-title">POPPO COINS</div>
         <table>
             <thead>
                 <tr>
-                    <th>COST</th>
+                    <th>PRICE</th>
                     <th>COINS</th>
-                    <th>COST</th>
+                    <th>PRICE</th>
                     <th>COINS</th>
                 </tr>
             </thead>
@@ -144,8 +157,6 @@
         const baseVal = parseFloat(document.getElementById('baseInput').value);
         const tbody = document.getElementById('matrixBody');
         
-        document.getElementById('canvasTitle').innerText = `Kopi Moka Priceless (Base: ${baseVal.toLocaleString()})`;
-
         tbody.innerHTML = '';
 
         if (isNaN(baseVal) || baseVal <= 0) return;
@@ -179,9 +190,8 @@
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
 
-        // Captures your exact responsive mobile list straight down cleanly
         html2canvas(targetElement, {
-            scale: 2, /* Keeps text super crisp on mobile images */
+            scale: 3, 
             logging: false,
             backgroundColor: "#ffffff"
         }).then(canvas => {
@@ -189,7 +199,7 @@
             
             const downloadTrigger = document.createElement('a');
             downloadTrigger.href = imageURI;
-            downloadTrigger.download = `Kopi_Moka_Matrix_${baseVal}.png`;
+            downloadTrigger.download = `POPPO_COINS_${baseVal}.png`;
             
             document.body.appendChild(downloadTrigger);
             downloadTrigger.click();
@@ -200,4 +210,4 @@
     calculateMatrix();
 </script>
 </body>
-</html>
+    </html>
