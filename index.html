@@ -137,18 +137,20 @@
             transition: margin-top 0.2s ease;
         }
 
-        /* DYNAMIC AUTO-HEIGHT BOUNDARY: Locked to 1080px wide, height grows automatically to prevent cutting */
+        /* FIXED 1080px WIDTH WITH AUTO HEIGHT STRUCTURE SAFETY */
         #photoTargetBlock {
-            background: #ffffff;
             width: 1080px !important;
-            padding: 45px 25px;
+            padding: 45px 25px 60px 25px; /* Added extra bottom buffer padding */
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-origin: top center; 
             flex-shrink: 0;
+            display: block;
+            height: auto !important;
         }
         
         /* THEME COLOR PARAMS */
         :root {
+            --canvas-bg: #ffffff;
             --title-color: #1e3a8a;
             --th-bg: #475569;
             --th-text: #ffffff;
@@ -157,6 +159,11 @@
             --col-grey-text: #0f172a;
             --col-white-bg: #ffffff;
             --col-white-text: #1e293b;
+        }
+
+        /* Enforce current canvas background across target element container */
+        #photoTargetBlock {
+            background-color: var(--canvas-bg) !important;
         }
 
         .canvas-title {
@@ -169,7 +176,7 @@
             letter-spacing: 2px;
         }
 
-        table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; background-color: transparent; }
         
         th, td { 
             border: 1px solid #cbd5e1; 
@@ -222,6 +229,10 @@
         </div>
 
         <div class="settings-panel" id="settingsPanel">
+            <div class="color-picker-group">
+                <span>Canvas Main Background:</span>
+                <input type="color" id="pickerCanvasBg" value="#ffffff" oninput="updateLiveColors()">
+            </div>
             <div class="color-picker-group">
                 <span>Title Color:</span>
                 <input type="color" id="pickerTitle" value="#1e3a8a" oninput="updateLiveColors()">
@@ -301,6 +312,7 @@
 
     function updateLiveColors() {
         const root = document.documentElement;
+        root.style.setProperty('--canvas-bg', document.getElementById('pickerCanvasBg').value);
         root.style.setProperty('--title-color', document.getElementById('pickerTitle').value);
         root.style.setProperty('--th-bg', document.getElementById('pickerThBg').value);
         root.style.setProperty('--th-text', document.getElementById('pickerThText').value);
@@ -349,11 +361,9 @@
         const screenWidth = window.innerWidth;
         
         const scaleFactor = screenWidth / 1080;
-        
         target.style.transform = `scale(${scaleFactor})`;
         
-        // Dynamically reads the total length of the table rows and sizes the wrapper so it fits on screen perfectly
-        const naturalHeight = target.scrollHeight;
+        const naturalHeight = target.offsetHeight;
         wrapper.style.height = `${naturalHeight * scaleFactor}px`;
     }
 
@@ -361,20 +371,24 @@
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
 
+        // Reset scaling visually so code can extract native size blueprint metrics
         const currentTransform = targetElement.style.transform;
         targetElement.style.transform = 'none';
 
-        // Finds the exact actual height needed to display all contents without cropping
-        const finalCalculatedHeight = targetElement.scrollHeight;
+        // Read the absolute total layout block footprint height required
+        const finalCalculatedHeight = targetElement.getBoundingClientRect().height;
+        const currentBgColor = document.getElementById('pickerCanvasBg').value;
 
         html2canvas(targetElement, {
             width: 1080,
             height: finalCalculatedHeight, 
             scale: 1, 
             logging: false,
-            backgroundColor: null,
+            backgroundColor: currentBgColor, // Enforce the color picker background on output
             windowWidth: 1080,
-            windowHeight: finalCalculatedHeight
+            windowHeight: finalCalculatedHeight,
+            scrollX: 0,
+            scrollY: 0
         }).then(canvas => {
             const imageURI = canvas.toDataURL("image/png");
             
