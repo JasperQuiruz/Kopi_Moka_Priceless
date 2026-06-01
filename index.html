@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kopi Moka Priceless</title>
     
-    <!-- Image Screenshot Capture Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
@@ -114,13 +113,13 @@
             --col-white-text: #1e293b;
         }
 
-        /* FIXED CANVAS SIZE DEFINITIONS */
+        /* HARDENED CANVAS CONTAINER MATRICES FOR 1080x2800 PHOTO CAPTURE */
         #photoTargetBlock {
             width: 1080px !important;
-            height: 3000px !important;
-            min-height: 3000px !important;
-            max-height: 3000px !important;
-            padding: 50px 30px;
+            height: 2800px !important;
+            min-height: 2800px !important;
+            max-height: 2800px !important;
+            padding: 45px 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-origin: top center; 
             flex-shrink: 0;
@@ -134,7 +133,7 @@
             text-align: center;
             font-size: 76px; 
             font-weight: 950;
-            margin-bottom: 35px;
+            margin-bottom: 30px;
             color: var(--title-color);
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -147,11 +146,11 @@
             text-align: center; 
             table-layout: fixed; 
             flex-grow: 1;
-            height: calc(100% - 120px); /* Locks total table size structurally */
+            height: calc(100% - 110px); 
         }
         
         tr {
-            height: calc(100% / 36); /* Harmonizes row scale perfectly across total canvas length */
+            height: calc(100% / 36); 
         }
 
         th, td { 
@@ -162,20 +161,19 @@
             vertical-align: middle;
         }
         
-        /* Taller visual Title Sub-Bar elements */
         th { 
             background-color: var(--th-bg); 
             color: var(--th-text); 
             font-weight: bold; 
             font-size: 44px; 
             letter-spacing: 1px; 
-            height: 110px; /* Locked specific headline height */
+            height: 105px; 
         }
         
         td { 
             font-size: 48px; 
             font-weight: bold; 
-            padding: 2px 0px !important;
+            padding: 1px 0px !important;
         }
         
         .col-grey { 
@@ -193,7 +191,6 @@
 </head>
 <body>
 
-    <!-- Fixed Top Menu Layer -->
     <div class="header-sticky" id="stickyHeader">
         <div class="input-row">
             <label>Base Rating:</label>
@@ -205,7 +202,6 @@
         </div>
     </div>
 
-    <!-- Scaler screen render frame layout wrapper -->
     <div class="scale-wrapper" id="scaleWrapper">
         <div id="photoTargetBlock">
             <div class="canvas-title">POPPO COINS</div>
@@ -313,7 +309,7 @@
         
         const scaleFactor = screenWidth / 1080;
         target.style.transform = `scale(${scaleFactor})`;
-        wrapper.style.height = `${3000 * scaleFactor}px`;
+        wrapper.style.height = `${2800 * scaleFactor}px`;
     }
 
     function exportToPhoto() {
@@ -322,16 +318,18 @@
         const currentTransform = targetElement.style.transform;
         const currentBgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
 
+        // 1. Clear responsive view scaling parameters to ensure precise rendering rules apply
         targetElement.style.transform = 'none';
 
+        // 2. Dispatch canvas rendering cycle with exact box constraints
         html2canvas(targetElement, {
             width: 1080,
-            height: 3000, 
+            height: 2800, 
             scale: 1, 
             logging: false,
             backgroundColor: currentBgColor, 
             windowWidth: 1080,
-            windowHeight: 3000,
+            windowHeight: 2800,
             scrollX: 0,
             scrollY: 0
         }).then(canvas => {
@@ -345,6 +343,7 @@
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
 
+            // 3. Seamlessly re-apply screen scaling attributes for web display
             targetElement.style.transform = currentTransform;
             adjustScale();
         });
