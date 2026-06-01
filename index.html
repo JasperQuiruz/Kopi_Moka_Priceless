@@ -137,21 +137,6 @@
             transition: margin-top 0.2s ease;
         }
 
-        /* STRICT 1080x3000 GEOMETRIC CONTAINER BOX */
-        #photoTargetBlock {
-            width: 1080px !important;
-            height: 3000px !important;
-            min-height: 3000px !important;
-            max-height: 3000px !important;
-            padding: 50px 30px 30px 30px; /* Reduced bottom padding slightly for layout alignment */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transform-origin: top center; 
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
         /* THEME COLOR PARAMS */
         :root {
             --canvas-bg: #ffffff;
@@ -165,7 +150,18 @@
             --col-white-text: #1e293b;
         }
 
+        /* MASTER CONTAINER RENDER TARGET */
         #photoTargetBlock {
+            width: 1080px !important;
+            height: 3000px !important;
+            min-height: 3000px !important;
+            max-height: 3000px !important;
+            padding: 60px 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform-origin: top center; 
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
             background-color: var(--canvas-bg) !important;
         }
 
@@ -180,14 +176,12 @@
             flex-shrink: 0;
         }
 
-        /* Table stretches perfectly to fill all remaining vertical space cleanly */
         table { 
             width: 100%; 
             border-collapse: collapse; 
             text-align: center; 
             table-layout: fixed; 
-            background-color: transparent;
-            flex-grow: 1; /* Automatically stretches to hit the absolute bottom padding boundary */
+            flex-grow: 1; /* Stretches dynamically down to fill the bottom area */
         }
         
         th, td { 
@@ -379,11 +373,14 @@
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
 
+        // Capture original visual style properties
         const currentTransform = targetElement.style.transform;
-        targetElement.style.transform = 'none';
-
         const currentBgColor = document.getElementById('pickerCanvasBg').value;
 
+        // Strip transform scaling natively so html2canvas renders the structural raw blueprint size
+        targetElement.style.transform = 'none';
+
+        // Force viewport adjustments directly during rendering to avoid mobile cutoff glitches
         html2canvas(targetElement, {
             width: 1080,
             height: 3000, 
@@ -393,7 +390,9 @@
             windowWidth: 1080,
             windowHeight: 3000,
             scrollX: 0,
-            scrollY: 0
+            scrollY: 0,
+            useCORS: true,
+            allowTaint: true
         }).then(canvas => {
             const imageURI = canvas.toDataURL("image/png");
             
@@ -405,6 +404,7 @@
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
 
+            // Re-apply original scaling layout settings seamlessly
             targetElement.style.transform = currentTransform;
         });
     }
