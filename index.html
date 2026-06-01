@@ -143,7 +143,7 @@
             height: 3000px !important;
             min-height: 3000px !important;
             max-height: 3000px !important;
-            padding: 50px 30px;
+            padding: 50px 30px 30px 30px; /* Reduced bottom padding slightly for layout alignment */
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-origin: top center; 
             flex-shrink: 0;
@@ -180,14 +180,14 @@
             flex-shrink: 0;
         }
 
-        /* Fixed Table Sizing to Guarantee 100% Fit in 3000px Height */
+        /* Table stretches perfectly to fill all remaining vertical space cleanly */
         table { 
             width: 100%; 
             border-collapse: collapse; 
             text-align: center; 
             table-layout: fixed; 
             background-color: transparent;
-            height: 2750px; /* Forces table element to match internal canvas space perfectly */
+            flex-grow: 1; /* Automatically stretches to hit the absolute bottom padding boundary */
         }
         
         th, td { 
@@ -205,7 +205,6 @@
             letter-spacing: 0.5px; 
         }
         
-        /* Numbers structured cleanly to maximize font face size safely */
         td { 
             font-size: 38px; 
             font-weight: 800; 
@@ -373,8 +372,6 @@
         
         const scaleFactor = screenWidth / 1080;
         target.style.transform = `scale(${scaleFactor})`;
-        
-        // Locks wrapper height layout to fit exactly onto phone display coordinates
         wrapper.style.height = `${3000 * scaleFactor}px`;
     }
 
@@ -382,7 +379,6 @@
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
 
-        // Reset scaling transform for rendering native high resolution matrix layout
         const currentTransform = targetElement.style.transform;
         targetElement.style.transform = 'none';
 
@@ -417,4 +413,4 @@
     calculateMatrix();
 </script>
 </body>
-                </html>
+    </html>
