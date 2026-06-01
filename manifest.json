@@ -1,0 +1,22 @@
+{
+  "name": "Kopi Moka Priceless",
+  "short_name": "Kopi Moka",
+  "description": "Price list matrix calculator for Poppo Coins",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme_color": "#e67e22",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2935/2935413.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2935/2935413.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
