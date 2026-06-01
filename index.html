@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kopi Moka Priceless</title>
     
+    <!-- Image Screenshot Capture Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
@@ -61,7 +62,7 @@
         
         /* Photo Export Button */
         .photo-btn {
-            flex: 1;
+            flex: 2;
             background-color: #e67e22;
             color: white;
             border: none;
@@ -75,69 +76,32 @@
         }
         .photo-btn:active { background-color: #d35400; }
 
-        /* Settings Toggle Button on the Right Side */
-        .settings-toggle-btn {
-            background-color: #4b5563;
+        /* Random Background Harmonizer Button */
+        .random-btn {
+            flex: 1;
+            background-color: #9c27b0;
             color: white;
             border: none;
-            padding: 14px 18px;
-            font-size: 18px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap;
         }
-        .settings-toggle-btn:active { background-color: #374151; }
-
-        /* Customization Control Drawer */
-        .settings-panel {
-            display: none;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 2px;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 260px;
-            overflow-y: auto;
-        }
-        .settings-panel.open { display: flex; }
-        .color-picker-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            background: white;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #f1f5f9;
-        }
-        .color-picker-group input[type="color"] {
-            border: none;
-            width: 35px;
-            height: 25px;
-            border-radius: 4px;
-            cursor: pointer;
-            background: none;
-        }
+        .random-btn:active { background-color: #7b1fa2; }
 
         /* SCALER WRAPPER */
         .scale-wrapper {
-            margin-top: 195px; 
+            margin-top: 140px; 
             width: 100vw;
             overflow: visible;
             display: flex;
             justify-content: center;
-            transition: margin-top 0.2s ease;
         }
 
-        /* THEME COLOR PARAMS */
+        /* DEFAULT THEME COLOR PARAMS */
         :root {
             --canvas-bg: #ffffff;
             --title-color: #1e3a8a;
@@ -150,26 +114,27 @@
             --col-white-text: #1e293b;
         }
 
-        /* FIXED OUTPUT RENDERING MEASUREMENTS */
+        /* FIXED CANVAS SIZE DEFINITIONS */
         #photoTargetBlock {
             width: 1080px !important;
             height: 3000px !important;
             min-height: 3000px !important;
             max-height: 3000px !important;
-            padding: 60px 30px;
+            padding: 50px 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-origin: top center; 
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
             background-color: var(--canvas-bg) !important;
+            transition: background-color 0.3s ease;
         }
 
         .canvas-title {
             text-align: center;
             font-size: 76px; 
             font-weight: 950;
-            margin-bottom: 45px;
+            margin-bottom: 35px;
             color: var(--title-color);
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -182,27 +147,35 @@
             text-align: center; 
             table-layout: fixed; 
             flex-grow: 1;
+            height: calc(100% - 120px); /* Locks total table size structurally */
         }
         
+        tr {
+            height: calc(100% / 36); /* Harmonizes row scale perfectly across total canvas length */
+        }
+
         th, td { 
             border: 1px solid #cbd5e1; 
             width: 25%; 
             white-space: nowrap; 
             overflow: hidden;
-            padding: 0px !important; /* Clears inner gaps to maximize absolute text display capacity */
+            vertical-align: middle;
         }
         
+        /* Taller visual Title Sub-Bar elements */
         th { 
             background-color: var(--th-bg); 
             color: var(--th-text); 
             font-weight: bold; 
-            font-size: 38px; 
-            letter-spacing: 0.5px; 
+            font-size: 44px; 
+            letter-spacing: 1px; 
+            height: 110px; /* Locked specific headline height */
         }
         
         td { 
-            font-size: 44px; /* Unified text size across all numeric boxes */
+            font-size: 48px; 
             font-weight: bold; 
+            padding: 2px 0px !important;
         }
         
         .col-grey { 
@@ -220,6 +193,7 @@
 </head>
 <body>
 
+    <!-- Fixed Top Menu Layer -->
     <div class="header-sticky" id="stickyHeader">
         <div class="input-row">
             <label>Base Rating:</label>
@@ -227,49 +201,11 @@
         </div>
         <div class="btn-row">
             <button class="photo-btn" onclick="exportToPhoto()">Save As Photo Image</button>
-            <button class="settings-toggle-btn" onclick="toggleSettingsPanel()">⚙️</button>
-        </div>
-
-        <div class="settings-panel" id="settingsPanel">
-            <div class="color-picker-group">
-                <span>Canvas Main Background:</span>
-                <input type="color" id="pickerCanvasBg" value="#ffffff" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>Title Color:</span>
-                <input type="color" id="pickerTitle" value="#1e3a8a" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>Header Background:</span>
-                <input type="color" id="pickerThBg" value="#475569" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>Header Text:</span>
-                <input type="color" id="pickerThText" value="#ffffff" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>Calculation Text (Green Results):</span>
-                <input type="color" id="pickerCalc" value="#16a34a" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>Grey Column Background:</span>
-                <input type="color" id="pickerGreyBg" value="#f1f5f9" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>Grey Column Text:</span>
-                <input type="color" id="pickerGreyText" value="#0f172a" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>White Column Background:</span>
-                <input type="color" id="pickerWhiteBg" value="#ffffff" oninput="updateLiveColors()">
-            </div>
-            <div class="color-picker-group">
-                <span>White Column Text:</span>
-                <input type="color" id="pickerWhiteText" value="#1e293b" oninput="updateLiveColors()">
-            </div>
+            <button class="random-btn" onclick="applyRandomHarmonizedPalette()">Surprise Me 🎲</button>
         </div>
     </div>
 
+    <!-- Scaler screen render frame layout wrapper -->
     <div class="scale-wrapper" id="scaleWrapper">
         <div id="photoTargetBlock">
             <div class="canvas-title">POPPO COINS</div>
@@ -301,28 +237,37 @@
         4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000
     ];
 
-    function toggleSettingsPanel() {
-        const panel = document.getElementById('settingsPanel');
-        const wrapper = document.getElementById('scaleWrapper');
-        panel.classList.toggle('open');
-        
-        setTimeout(() => {
-            const headerHeight = document.getElementById('stickyHeader').offsetHeight;
-            wrapper.style.marginTop = `${headerHeight + 8}px`;
-        }, 50);
-    }
+    const optimizedPalettes = [
+        { canvasBg: "#ffffff", title: "#1e3a8a", thBg: "#475569", thText: "#ffffff", calc: "#16a34a", greyBg: "#f1f5f9", greyTxt: "#0f172a", whiteBg: "#ffffff", whiteTxt: "#1e293b" }, 
+        { canvasBg: "#f7f9fc", title: "#2c3e50", thBg: "#16a085", thText: "#ffffff", calc: "#27ae60", greyBg: "#eaeded", greyTxt: "#2c3e50", whiteBg: "#ffffff", whiteTxt: "#34495e" }, 
+        { canvasBg: "#fffdf9", title: "#5c3d2e", thBg: "#865439", thText: "#ffffff", calc: "#b85c38", greyBg: "#f4eedb", greyTxt: "#5c3d2e", whiteBg: "#ffffff", whiteTxt: "#2d2424" }, 
+        { canvasBg: "#f5fdfb", title: "#0f4c5c", thBg: "#e36414", thText: "#ffffff", calc: "#5f0f40", greyBg: "#e9f7f5", greyTxt: "#0f4c5c", whiteBg: "#ffffff", whiteTxt: "#fb8b24" }, 
+        { canvasBg: "#fafafa", title: "#212121", thBg: "#263238", thText: "#ffffff", calc: "#d84315", greyBg: "#eceff1", greyTxt: "#263238", whiteBg: "#ffffff", whiteTxt: "#37474f" }, 
+        { canvasBg: "#f0f4f8", title: "#102a43", thBg: "#243b53", thText: "#ffffff", calc: "#007c89", greyBg: "#bcccdc", greyTxt: "#102a43", whiteBg: "#ffffff", whiteTxt: "#334e68" }, 
+        { canvasBg: "#fff8f8", title: "#6b0f1a", thBg: "#b91372", thText: "#ffffff", calc: "#007f5f", greyBg: "#fceade", greyTxt: "#6b0f1a", whiteBg: "#ffffff", whiteTxt: "#111111" }, 
+        { canvasBg: "#fcf8ff", title: "#3f51b5", thBg: "#673ab7", thText: "#ffffff", calc: "#e91e63", greyBg: "#f1f0fa", greyTxt: "#3f51b5", whiteBg: "#ffffff", whiteTxt: "#212121" }  
+    ];
 
-    function updateLiveColors() {
+    let lastPaletteIndex = 0;
+
+    function applyRandomHarmonizedPalette() {
+        let nextIndex = lastPaletteIndex;
+        while (nextIndex === lastPaletteIndex) {
+            nextIndex = Math.floor(Math.random() * optimizedPalettes.length);
+        }
+        lastPaletteIndex = nextIndex;
+        const choice = optimizedPalettes[nextIndex];
+        
         const root = document.documentElement;
-        root.style.setProperty('--canvas-bg', document.getElementById('pickerCanvasBg').value);
-        root.style.setProperty('--title-color', document.getElementById('pickerTitle').value);
-        root.style.setProperty('--th-bg', document.getElementById('pickerThBg').value);
-        root.style.setProperty('--th-text', document.getElementById('pickerThText').value);
-        root.style.setProperty('--calc-result-color', document.getElementById('pickerCalc').value);
-        root.style.setProperty('--col-grey-bg', document.getElementById('pickerGreyBg').value);
-        root.style.setProperty('--col-grey-text', document.getElementById('pickerGreyText').value);
-        root.style.setProperty('--col-white-bg', document.getElementById('pickerWhiteBg').value);
-        root.style.setProperty('--col-white-text', document.getElementById('pickerWhiteText').value);
+        root.style.setProperty('--canvas-bg', choice.canvasBg);
+        root.style.setProperty('--title-color', choice.title);
+        root.style.setProperty('--th-bg', choice.thBg);
+        root.style.setProperty('--th-text', choice.thText);
+        root.style.setProperty('--calc-result-color', choice.calc);
+        root.style.setProperty('--col-grey-bg', choice.greyBg);
+        root.style.setProperty('--col-grey-text', choice.greyTxt);
+        root.style.setProperty('--col-white-bg', choice.whiteBg);
+        root.style.setProperty('--col-white-text', choice.whiteTxt);
     }
 
     function calculateMatrix() {
@@ -337,9 +282,13 @@
             const coinLeft = leftCoins[i];
             const costRight = rightCosts[i];
 
-            let calculationCoins = coinLeft;
-            if (coinLeft <= 15000) { calculationCoins = coinLeft + 300; }
-            const computedCostLeft = Math.ceil((calculationCoins / 1000000) * baseVal);
+            let baseCostLeft = (coinLeft / 1000000) * baseVal;
+            
+            if (coinLeft <= 15000) {
+                baseCostLeft = baseCostLeft + 1.5;
+            }
+            
+            const computedCostLeft = Math.ceil(baseCostLeft);
 
             let exactCoinsRight = (costRight / baseVal) * 1000000;
             let computedCoinsRight = Math.floor(exactCoinsRight / 100) * 100;
@@ -371,9 +320,8 @@
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
         const currentTransform = targetElement.style.transform;
-        const currentBgColor = document.getElementById('pickerCanvasBg').value;
+        const currentBgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
 
-        // Strip preview scaling metrics so full block dimensions can compile
         targetElement.style.transform = 'none';
 
         html2canvas(targetElement, {
@@ -397,7 +345,6 @@
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
 
-            // Re-apply preview scaling safely
             targetElement.style.transform = currentTransform;
             adjustScale();
         });
