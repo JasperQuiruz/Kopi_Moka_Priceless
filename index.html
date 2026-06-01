@@ -382,14 +382,14 @@
         const currentTransform = targetElement.style.transform;
         const currentBgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
 
-        // 1. Temporarily strip standard viewport scaling
+        // 1. Temporarily strip responsive interface transformation parameters
         targetElement.style.transform = 'none';
 
-        // 2. Render target block down into raw image data
+        // 2. Capture layout state into image resource data
         html2canvas(targetElement, {
             width: 1080,
             height: 2800, 
-            scale: 2, // High resolution capture
+            scale: 2, // High resolution pixel ratio
             logging: false,
             backgroundColor: currentBgColor, 
             windowWidth: 1080,
@@ -399,36 +399,30 @@
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 0.98);
             
-            // 3. Setup standard A4 Bond Paper geometry params [595.28 pt width x 841.89 pt height]
+            // 3. Setup standard Portrait A4 Bond Paper format [595.28 pt wide x 841.89 pt tall]
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('l', 'pt', 'a4'); // 'l' switches layout to landscape orientation
+            const pdf = new jsPDF('p', 'pt', 'a4'); 
             
-            const pageWidth = pdf.internal.pageSize.getWidth();   // 841.89 pt
-            const pageHeight = pdf.internal.pageSize.getHeight(); // 595.28 pt
+            const pageWidth = pdf.internal.pageSize.getWidth();   // 595.28 pt
+            const pageHeight = pdf.internal.pageSize.getHeight(); // 841.89 pt
             
-            // 4. Split width exactly in half for 2 columns with NO GAP
-            const cardWidth = pageWidth / 2; // 420.94 pt each
+            // 4. Split width exactly in half to secure zero spacing gap
+            const cardWidth = pageWidth / 2; // 297.64 pt each
             
-            // Calculate proportional height for the card based on original 1080x2800 ratio
-            const cardHeight = cardWidth * (2800 / 1080); // ~1091.3 pt
+            // Compute maximum height boundary rule based on source card ratio
+            const cardHeight = cardWidth * (2800 / 1080); // ~771.66 pt
             
-            // To make sure it doesn't overflow or clip badly if it's too tall, scale to page height
-            let drawWidth = cardWidth;
-            let drawHeight = pageHeight;
-            let finalCardWidth = drawHeight * (1080 / 2800); // Proportional width based on page height
+            // Vertical alignment offset calculation to center cards inside the document
+            const startingY = (pageHeight - cardHeight) / 2;
             
-            // Center the entire block horizontally together on the paper canvas
-            const combinedWidth = finalCardWidth * 2;
-            const startingX = (pageWidth - combinedWidth) / 2;
+            // 5. Draw two copies completely side-by-side (First card ends at cardWidth, Second starts at cardWidth)
+            pdf.addImage(imgData, 'JPEG', 0, startingY, cardWidth, cardHeight);
+            pdf.addImage(imgData, 'JPEG', cardWidth, startingY, cardWidth, cardHeight);
             
-            // 5. Draw two copies side-by-side with no gap between them
-            pdf.addImage(imgData, 'JPEG', startingX, 0, finalCardWidth, drawHeight);
-            pdf.addImage(imgData, 'JPEG', startingX + finalCardWidth, 0, finalCardWidth, drawHeight);
-            
-            // 6. Trigger file system delivery
-            pdf.save(`POPPO_COINS_2x_${baseVal}.pdf`);
+            // 6. Deliver file package to browser client
+            pdf.save(`POPPO_COINS_2x_Portrait_${baseVal}.pdf`);
 
-            // 7. Restore interface scaling parameters
+            // 7. Restore interface visibility transforms
             targetElement.style.transform = currentTransform;
             adjustScale();
         });
