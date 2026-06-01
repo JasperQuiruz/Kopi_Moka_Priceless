@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2935/2935413.png">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -61,25 +62,29 @@
         /* Action Buttons Row */
         .btn-row {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
         }
         
-        /* Photo Export Button */
-        .photo-btn {
-            flex: 2;
-            background-color: #e67e22;
+        /* Export Buttons Base Styling */
+        .action-btn {
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 16px;
+            padding: 14px 8px;
+            font-size: 13px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
+        
+        .photo-btn { flex: 1.2; background-color: #e67e22; }
         .photo-btn:active { background-color: #d35400; }
+
+        .pdf-btn { flex: 1.2; background-color: #e74c3c; }
+        .pdf-btn:active { background-color: #c0392b; }
 
         /* Random Background Harmonizer Button */
         .random-btn {
@@ -87,8 +92,8 @@
             background-color: #9c27b0;
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 15px;
+            padding: 14px 4px;
+            font-size: 13px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
@@ -203,7 +208,8 @@
             <input type="number" id="baseInput" value="6260" inputmode="decimal" oninput="calculateMatrix()">
         </div>
         <div class="btn-row">
-            <button class="photo-btn" onclick="exportToPhoto()">Save As Photo Image</button>
+            <button class="action-btn photo-btn" onclick="exportToPhoto()">Save Photo</button>
+            <button class="action-btn pdf-btn" onclick="exportToPDF()">Save PDF</button>
             <button class="random-btn" onclick="applyRandomHarmonizedPalette()">Surprise Me 🎲</button>
         </div>
     </div>
@@ -229,7 +235,6 @@
     // --- PWA SERVICE WORKER INITIALIZER ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            // Generates an inline fallback service worker blob if an external sw.js file isn't uploaded yet
             const swContent = `
                 const CACHE_NAME = 'kopi-moka-v1';
                 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['.', 'index.html']))));
@@ -238,7 +243,6 @@
             const blob = new Blob([swContent], { type: 'text/javascript' });
             const swUrl = URL.createObjectURL(blob);
             
-            // Try to look for your standard file, otherwise back up to the auto-blob
             navigator.serviceWorker.register('sw.js').catch(() => {
                 return navigator.serviceWorker.register(swUrl);
             }).then(() => console.log("PWA Engine Prepared.")).catch(err => console.log("PWA Init Failed:", err));
@@ -367,6 +371,45 @@
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
 
+            targetElement.style.transform = currentTransform;
+            adjustScale();
+        });
+    }
+
+    function exportToPDF() {
+        const baseVal = document.getElementById('baseInput').value;
+        const targetElement = document.getElementById('photoTargetBlock');
+        const currentTransform = targetElement.style.transform;
+        const currentBgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
+
+        // 1. Temporarily strip standard viewport responsive scales
+        targetElement.style.transform = 'none';
+
+        // 2. Generate Canvas Element
+        html2canvas(targetElement, {
+            width: 1080,
+            height: 2800, 
+            scale: 2, // Double scale factor generates crystal-clear printed text inside the PDF
+            logging: false,
+            backgroundColor: currentBgColor, 
+            windowWidth: 1080,
+            windowHeight: 2800,
+            scrollX: 0,
+            scrollY: 0
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            
+            // 3. Initialize jsPDF context in portrait mode with point scale matrices
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'pt', [595.28, 1543.56]); // Standardized aspect ratio to perfectly lock 1080x2800 pixels into page measurements
+            
+            // 4. Fill document context with page image
+            pdf.addImage(imgData, 'JPEG', 0, 0, 595.28, 1543.56);
+            
+            // 5. Trigger download sequence
+            pdf.save(`POPPO_COINS_${baseVal}.pdf`);
+
+            // 6. Restore screen-scaling interface metrics
             targetElement.style.transform = currentTransform;
             adjustScale();
         });
