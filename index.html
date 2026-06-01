@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kopi Moka Priceless</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -148,7 +150,7 @@
             --col-white-text: #1e293b;
         }
 
-        /* MASTER CONTAINER RENDER TARGET */
+        /* FIXED OUTPUT RENDERING MEASUREMENTS */
         #photoTargetBlock {
             width: 1080px !important;
             height: 3000px !important;
@@ -187,25 +189,25 @@
             width: 25%; 
             white-space: nowrap; 
             overflow: hidden;
+            padding: 0px !important; /* Clears inner gaps to maximize absolute text display capacity */
         }
         
         th { 
             background-color: var(--th-bg); 
             color: var(--th-text); 
             font-weight: bold; 
-            font-size: 34px; 
+            font-size: 38px; 
             letter-spacing: 0.5px; 
         }
         
         td { 
-            font-size: 38px; 
-            font-weight: 800; 
+            font-size: 44px; /* Unified text size across all numeric boxes */
+            font-weight: bold; 
         }
         
         .col-grey { 
             background-color: var(--col-grey-bg); 
             color: var(--col-grey-text); 
-            font-weight: 800; 
         }
         .col-white { 
             background-color: var(--col-white-bg);
@@ -213,8 +215,6 @@
         }
         .calc-result { 
             color: var(--calc-result-color) !important; 
-            font-weight: 900; 
-            font-size: 42px; 
         } 
     </style>
 </head>
@@ -370,104 +370,37 @@
     function exportToPhoto() {
         const baseVal = document.getElementById('baseInput').value;
         const targetElement = document.getElementById('photoTargetBlock');
-        
-        // Grab current style properties from live options panel configuration picker
-        const canvasBg = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
-        const titleColor = getComputedStyle(document.documentElement).getPropertyValue('--title-color').trim();
-        const thBg = getComputedStyle(document.documentElement).getPropertyValue('--th-bg').trim();
-        const thText = getComputedStyle(document.documentElement).getPropertyValue('--th-text').trim();
-        const calcColor = getComputedStyle(document.documentElement).getPropertyValue('--calc-result-color').trim();
-        const colGreyBg = getComputedStyle(document.documentElement).getPropertyValue('--col-grey-bg').trim();
-        const colGreyText = getComputedStyle(document.documentElement).getPropertyValue('--col-grey-text').trim();
-        const colWhiteBg = getComputedStyle(document.documentElement).getPropertyValue('--col-white-bg').trim();
-        const colWhiteText = getComputedStyle(document.documentElement).getPropertyValue('--col-white-text').trim();
+        const currentTransform = targetElement.style.transform;
+        const currentBgColor = document.getElementById('pickerCanvasBg').value;
 
-        // Extrapolate structural copy text cleanly to match design matrix directly inside an un-clipped SVG box layout
-        const tableBodyHTML = document.getElementById('matrixBody').innerHTML;
+        // Strip preview scaling metrics so full block dimensions can compile
+        targetElement.style.transform = 'none';
 
-        // Compile clean SVG file data layout with strict dimensions of 1080x3000
-        const svgString = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="3000" viewBox="0 0 1080 3000">
-            <foreignObject width="1080" height="3000">
-                <div xmlns="http://www.w3.org/1999/xhtml" style="
-                    box-sizing: border-box;
-                    width: 1080px;
-                    height: 3000px;
-                    background-color: ${canvasBg};
-                    padding: 60px 30px;
-                    display: flex;
-                    flex-direction: column;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    margin: 0;
-                ">
-                    <div style="
-                        text-align: center;
-                        font-size: 76px;
-                        font-weight: 950;
-                        margin-bottom: 45px;
-                        color: ${titleColor};
-                        text-transform: uppercase;
-                        letter-spacing: 2px;
-                    ">POPPO COINS</div>
-                    <table style="
-                        width: 100%;
-                        border-collapse: collapse;
-                        text-align: center;
-                        table-layout: fixed;
-                        flex-grow: 1;
-                        background: transparent;
-                    ">
-                        <thead>
-                            <tr>
-                                <th style="border: 1px solid #cbd5e1; width: 25%; background-color: ${thBg}; color: ${thText}; font-weight: bold; font-size: 34px; padding: 15px 0; letter-spacing: 0.5px;">PRICE</th>
-                                <th style="border: 1px solid #cbd5e1; width: 25%; background-color: ${thBg}; color: ${thText}; font-weight: bold; font-size: 34px; padding: 15px 0; letter-spacing: 0.5px;">COINS</th>
-                                <th style="border: 1px solid #cbd5e1; width: 25%; background-color: ${thBg}; color: ${thText}; font-weight: bold; font-size: 34px; padding: 15px 0; letter-spacing: 0.5px;">PRICE</th>
-                                <th style="border: 1px solid #cbd5e1; width: 25%; background-color: ${thBg}; color: ${thText}; font-weight: bold; font-size: 34px; padding: 15px 0; letter-spacing: 0.5px;">COINS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableBodyHTML}
-                        </tbody>
-                    </table>
-                </div>
-                <style>
-                    tr { height: calc((3000px - 220px) / 36); }
-                    td { border: 1px solid #cbd5e1; font-size: 38px; font-weight: 800; }
-                    .col-grey { background-color: ${colGreyBg} !important; color: ${colGreyText} !important; }
-                    .col-white { background-color: ${colWhiteBg} !important; color: ${colWhiteText} !important; }
-                    .calc-result { color: ${calcColor} !important; font-weight: 900; font-size: 42px; }
-                </style>
-            </foreignObject>
-        </svg>`;
-
-        // Convert generated asset blueprint payload directly into a clean system file download stream trigger
-        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-        const URLBlob = window.URL || window.webkitURL || window;
-        const blobURL = URLBlob.createObjectURL(svgBlob);
-
-        const imgRenderInstance = new Image();
-        imgRenderInstance.onload = function() {
-            const renderCanvas = document.createElement('canvas');
-            renderCanvas.width = 1080;
-            renderCanvas.height = 3000;
-            const contextCtx = renderCanvas.getContext('2d');
+        html2canvas(targetElement, {
+            width: 1080,
+            height: 3000, 
+            scale: 1, 
+            logging: false,
+            backgroundColor: currentBgColor, 
+            windowWidth: 1080,
+            windowHeight: 3000,
+            scrollX: 0,
+            scrollY: 0
+        }).then(canvas => {
+            const imageURI = canvas.toDataURL("image/png");
             
-            // Draw clean absolute raster data without relying on browser engine UI parameters
-            contextCtx.drawImage(imgRenderInstance, 0, 0, 1080, 3000);
-
-            const imageURI = renderCanvas.toDataURL('image/png');
             const downloadTrigger = document.createElement('a');
             downloadTrigger.href = imageURI;
             downloadTrigger.download = `POPPO_COINS_${baseVal}.png`;
-
+            
             document.body.appendChild(downloadTrigger);
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
-            
-            URLBlob.revokeObjectURL(blobURL);
-        };
 
-        imgRenderInstance.src = blobURL;
+            // Re-apply preview scaling safely
+            targetElement.style.transform = currentTransform;
+            adjustScale();
+        });
     }
 
     window.addEventListener('resize', adjustScale);
