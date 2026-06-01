@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kopi Moka Priceless</title>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Kopi Moka Priceless">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2935/2935413.png">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
@@ -220,6 +226,26 @@
     </div>
 
 <script>
+    // --- PWA SERVICE WORKER INITIALIZER ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // Generates an inline fallback service worker blob if an external sw.js file isn't uploaded yet
+            const swContent = `
+                const CACHE_NAME = 'kopi-moka-v1';
+                self.addEventListener('install', e => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['.', 'index.html']))));
+                self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+            `;
+            const blob = new Blob([swContent], { type: 'text/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            // Try to look for your standard file, otherwise back up to the auto-blob
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                return navigator.serviceWorker.register(swUrl);
+            }).then(() => console.log("PWA Engine Prepared.")).catch(err => console.log("PWA Init Failed:", err));
+        });
+    }
+
+    // --- APPLICATION VARIABLES & MATRIX LOGIC ---
     const leftCoins = [
         8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 20000, 30000, 
         40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 200000, 
@@ -318,10 +344,8 @@
         const currentTransform = targetElement.style.transform;
         const currentBgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
 
-        // 1. Clear responsive view scaling parameters to ensure precise rendering rules apply
         targetElement.style.transform = 'none';
 
-        // 2. Dispatch canvas rendering cycle with exact box constraints
         html2canvas(targetElement, {
             width: 1080,
             height: 2800, 
@@ -343,7 +367,6 @@
             downloadTrigger.click();
             document.body.removeChild(downloadTrigger);
 
-            // 3. Seamlessly re-apply screen scaling attributes for web display
             targetElement.style.transform = currentTransform;
             adjustScale();
         });
