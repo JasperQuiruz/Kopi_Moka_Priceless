@@ -124,7 +124,7 @@
             --col-white-text: #1e293b;
         }
 
-        /* HARDENED CANVAS CONTAINER MATRICES FOR 1080x2800 PHOTO CAPTURE */
+        /* CANVAS CONTAINER FOR PORTRAIT COPIES */
         #photoTargetBlock {
             width: 1080px !important;
             height: 2800px !important;
@@ -308,16 +308,34 @@
             const coinLeft = leftCoins[i];
             const costRight = rightCosts[i];
 
-            let baseCostLeft = (coinLeft / 1000000) * baseVal;
+            // 1. FINDING PESOS (Left Side): (coins / 1M) * divisor
+            let exactPesosLeft = (coinLeft / 1000000) * baseVal;
             
+            // SPECIAL RULE: Add 1.5 fee to tiers at or below 15,000 coins
             if (coinLeft <= 15000) {
-                baseCostLeft = baseCostLeft + 1.5;
+                exactPesosLeft += 1.5;
             }
             
-            const computedCostLeft = Math.ceil(baseCostLeft);
+            // SPECIFIC PESO ROUNDING RULE:
+            // Isolate the 1st decimal place. If it's .1 to .9, round UP. Ignore .01-.09.
+            const wholePart = Math.floor(exactPesosLeft);
+            const rawDecimals = exactPesosLeft - wholePart;
+            // Get the first digit after the decimal point (0-9) safely
+            const firstDecimalDigit = Math.floor(parseFloat(rawDecimals.toFixed(4)) * 10);
+            
+            let computedCostLeft;
+            if (firstDecimalDigit >= 1) {
+                computedCostLeft = wholePart + 1; // Auto 1 if 1st decimal is .1 or higher
+            } else {
+                computedCostLeft = wholePart;     // Ignore if it's .0x (keeps it flat)
+            }
 
-            let exactCoinsRight = (costRight / baseVal) * 1000000;
-            let computedCoinsRight = Math.floor(exactCoinsRight / 100) * 100;
+            // 2. FINDING COINS (Right Side): (pesos / divisor) * 1M
+            const exactCoinsRight = (costRight / baseVal) * 1000000;
+            
+            // IGNORE COIN DECIMALS COMPLETELY: Truncate down to drop tens and units place flat
+            const cleanedCoinsRight = parseFloat(exactCoinsRight.toFixed(4));
+            const computedCoinsRight = Math.floor(cleanedCoinsRight / 100) * 100;
 
             const rowHTML = `
                 <tr>
@@ -382,14 +400,12 @@
         const currentTransform = targetElement.style.transform;
         const currentBgColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
 
-        // 1. Temporarily strip responsive interface transformation parameters
         targetElement.style.transform = 'none';
 
-        // 2. Capture layout state into image resource data
         html2canvas(targetElement, {
             width: 1080,
             height: 2800, 
-            scale: 2, // High resolution pixel ratio
+            scale: 2, 
             logging: false,
             backgroundColor: currentBgColor, 
             windowWidth: 1080,
@@ -399,30 +415,22 @@
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 0.98);
             
-            // 3. Setup standard Portrait A4 Bond Paper format [595.28 pt wide x 841.89 pt tall]
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'pt', 'a4'); 
             
-            const pageWidth = pdf.internal.pageSize.getWidth();   // 595.28 pt
-            const pageHeight = pdf.internal.pageSize.getHeight(); // 841.89 pt
+            const pageWidth = pdf.internal.pageSize.getWidth();   
+            const pageHeight = pdf.internal.pageSize.getHeight(); 
             
-            // 4. Split width exactly in half to secure zero spacing gap
-            const cardWidth = pageWidth / 2; // 297.64 pt each
+            const cardWidth = pageWidth / 2; 
+            const cardHeight = cardWidth * (2800 / 1080); 
             
-            // Compute maximum height boundary rule based on source card ratio
-            const cardHeight = cardWidth * (2800 / 1080); // ~771.66 pt
-            
-            // Vertical alignment offset calculation to center cards inside the document
             const startingY = (pageHeight - cardHeight) / 2;
             
-            // 5. Draw two copies completely side-by-side (First card ends at cardWidth, Second starts at cardWidth)
             pdf.addImage(imgData, 'JPEG', 0, startingY, cardWidth, cardHeight);
             pdf.addImage(imgData, 'JPEG', cardWidth, startingY, cardWidth, cardHeight);
             
-            // 6. Deliver file package to browser client
             pdf.save(`POPPO_COINS_2x_Portrait_${baseVal}.pdf`);
 
-            // 7. Restore interface visibility transforms
             targetElement.style.transform = currentTransform;
             adjustScale();
         });
