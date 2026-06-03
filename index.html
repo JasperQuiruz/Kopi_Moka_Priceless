@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="Kopi Moka Priceless">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2935/2935413.png">
     
+    <!-- Dependencies for Exporting Documents -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -25,86 +26,116 @@
             overflow-x: hidden; 
         }
         
-        /* Fixed Header Controls - Locked to Phone Viewport */
+        /* BEAUTIFIED MODIFIER PANEL */
         .header-sticky {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: #ffffff;
-            padding: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 14px 16px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             z-index: 100;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
-        .input-row {
+        
+        .input-container {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            gap: 10px;
-        }
-        .header-sticky label { font-weight: bold; color: #2c3e50; font-size: 18px; }
-        .header-sticky input {
-            flex: 1;
-            padding: 10px;
-            font-size: 22px;
-            font-weight: bold;
-            border: 2px solid #228be6;
-            border-radius: 8px;
-            text-align: center;
-            background: #e7f5ff;
-            color: #1c7ed6;
-        }
-
-        /* Action Buttons Row */
-        .btn-row {
-            display: flex;
-            gap: 6px;
+            flex-direction: row;
+            gap: 12px;
             width: 100%;
         }
         
-        /* Export Buttons Base Styling */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            background: #f8fafc;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        .input-row:focus-within {
+            border-color: #228be6;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.12);
+        }
+        
+        .header-sticky label { 
+            font-weight: 700; 
+            color: #64748b; 
+            font-size: 12px; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        
+        .header-sticky input {
+            width: 100%;
+            padding: 4px 0;
+            font-size: 20px;
+            font-weight: 800;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+
+        #lowBaseInput { color: #7048e8; }
+        #baseInput { color: #1c7ed6; }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        
         .action-btn {
             color: white;
             border: none;
-            padding: 14px 8px;
-            font-size: 13px;
-            font-weight: bold;
-            border-radius: 8px;
+            padding: 12px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 10px;
             cursor: pointer;
             text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
             text-align: center;
+            transition: transform 0.1s ease;
         }
+        .action-btn:active { transform: scale(0.97); }
         
-        .photo-btn { flex: 1.2; background-color: #e67e22; }
-        .photo-btn:active { background-color: #d35400; }
+        .photo-btn { flex: 1.2; background: linear-gradient(135deg, #f39c12, #d35400); }
+        .pdf-btn { flex: 1.2; background: linear-gradient(135deg, #ff7675, #d63031); }
 
-        .pdf-btn { flex: 1.2; background-color: #e74c3c; }
-        .pdf-btn:active { background-color: #c0392b; }
-
-        /* Random Background Harmonizer Button */
         .random-btn {
             flex: 1;
-            background-color: #9c27b0;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
             color: white;
             border: none;
-            padding: 14px 4px;
-            font-size: 13px;
-            font-weight: bold;
-            border-radius: 8px;
+            padding: 12px 4px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
             white-space: nowrap;
+            letter-spacing: 0.5px;
+            transition: transform 0.1s ease;
         }
-        .random-btn:active { background-color: #7b1fa2; }
+        .random-btn:active { transform: scale(0.97); }
 
         /* SCALER WRAPPER */
         .scale-wrapper {
-            margin-top: 140px; 
+            margin-top: 180px; 
             width: 100vw;
             overflow: visible;
             display: flex;
@@ -140,15 +171,19 @@
             transition: background-color 0.3s ease;
         }
 
+        /* CONNECTED TITLE CELL WITH BORDERS */
         .canvas-title {
             text-align: center;
             font-size: 76px; 
             font-weight: 950;
-            margin-bottom: 30px;
+            padding: 20px 0;
+            margin-bottom: 0px; /* Merged margins directly with the upper grid boundaries */
             color: var(--title-color);
             text-transform: uppercase;
             letter-spacing: 2px;
             flex-shrink: 0;
+            border: 1px solid #cbd5e1;
+            border-bottom: none; /* Flow downward into table seamlessly */
         }
 
         table { 
@@ -157,7 +192,7 @@
             text-align: center; 
             table-layout: fixed; 
             flex-grow: 1;
-            height: calc(100% - 110px); 
+            height: calc(100% - 150px); 
         }
         
         tr {
@@ -203,9 +238,15 @@
 <body>
 
     <div class="header-sticky" id="stickyHeader">
-        <div class="input-row">
-            <label>Base Rating:</label>
-            <input type="number" id="baseInput" value="6260" inputmode="decimal" oninput="calculateMatrix()">
+        <div class="input-container">
+            <div class="input-row">
+                <label>15k↓</label>
+                <input type="number" id="lowBaseInput" value="6260" inputmode="decimal" oninput="calculateMatrix()">
+            </div>
+            <div class="input-row">
+                <label>20k↑</label>
+                <input type="number" id="baseInput" value="6260" inputmode="decimal" oninput="calculateMatrix()">
+            </div>
         </div>
         <div class="btn-row">
             <button class="action-btn photo-btn" onclick="exportToPhoto()">Save Photo</button>
@@ -298,42 +339,36 @@
 
     function calculateMatrix() {
         const baseVal = parseFloat(document.getElementById('baseInput').value);
+        const lowBaseVal = parseFloat(document.getElementById('lowBaseInput').value);
         const tbody = document.getElementById('matrixBody');
         
         tbody.innerHTML = '';
 
-        if (isNaN(baseVal) || baseVal <= 0) return;
+        if (isNaN(baseVal) || baseVal <= 0 || isNaN(lowBaseVal) || lowBaseVal <= 0) return;
 
         for (let i = 0; i < leftCoins.length; i++) {
             const coinLeft = leftCoins[i];
             const costRight = rightCosts[i];
 
-            // 1. FINDING PESOS (Left Side): (coins / 1M) * divisor
-            let exactPesosLeft = (coinLeft / 1000000) * baseVal;
+            const activeBaseVal = (coinLeft <= 15000) ? lowBaseVal : baseVal;
+
+            // 1. FINDING PESOS (Left Side)
+            let exactPesosLeft = (coinLeft / 1000000) * activeBaseVal;
             
-            // SPECIAL RULE: Add 1.5 fee to tiers at or below 15,000 coins
-            if (coinLeft <= 15000) {
-                exactPesosLeft += 1.5;
-            }
-            
-            // SPECIFIC PESO ROUNDING RULE:
-            // Isolate the 1st decimal place. If it's .1 to .9, round UP. Ignore .01-.09.
             const wholePart = Math.floor(exactPesosLeft);
             const rawDecimals = exactPesosLeft - wholePart;
-            // Get the first digit after the decimal point (0-9) safely
             const firstDecimalDigit = Math.floor(parseFloat(rawDecimals.toFixed(4)) * 10);
             
             let computedCostLeft;
             if (firstDecimalDigit >= 1) {
-                computedCostLeft = wholePart + 1; // Auto 1 if 1st decimal is .1 or higher
+                computedCostLeft = wholePart + 1;
             } else {
-                computedCostLeft = wholePart;     // Ignore if it's .0x (keeps it flat)
+                computedCostLeft = wholePart;
             }
 
-            // 2. FINDING COINS (Right Side): (pesos / divisor) * 1M
+            // 2. FINDING COINS (Right Side)
             const exactCoinsRight = (costRight / baseVal) * 1000000;
             
-            // IGNORE COIN DECIMALS COMPLETELY: Truncate down to drop tens and units place flat
             const cleanedCoinsRight = parseFloat(exactCoinsRight.toFixed(4));
             const computedCoinsRight = Math.floor(cleanedCoinsRight / 100) * 100;
 
